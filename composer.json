@@ -1,0 +1,23 @@
+{
+    "name": "stefein/submail-sdk",
+    "description": "php",
+    "type": "library",
+    "require": {
+        "guzzlehttp/guzzle": "^6.3",
+        "curl/curl": "^2.2",
+        "php-curl-class/php-curl-class": "^8.6"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Hsuechin",
+            "email": "cyan8@live.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload" : {
+        "psr-4": {
+            "Stefein\\": "src/"
+        }
+    }
+}
