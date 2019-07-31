@@ -18,8 +18,8 @@ $obj->config    =   $config;
 
 //$res = $obj->getCredits('message');
 
-$vars   =   array('code'=>rand(100,999));
-$res    =   $obj->messagexSend("130********",$vars);
+//$vars   =   array('code'=>rand(100,999));
+//$res    =   $obj->messagexSend("130********",$vars);
 
 
 //$content    =   '【Submail】您好，@var(name)，您的取货码为 @var(code)';
