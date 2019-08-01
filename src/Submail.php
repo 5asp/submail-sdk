@@ -66,9 +66,9 @@ class Submail
         curl_setopt_array($ch, array(
             CURLOPT_URL => $api,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POSTFIELDS => http_build_query($data),
+            CURLOPT_POSTFIELDS => $data,
             CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_HTTPHEADER => array("Content-Type: application/x-www-form-urlencoded")
+            CURLOPT_HTTPHEADER => array("Content-Type: multipart/form-data")
         ));
         $output = curl_exec($ch);
         curl_close($ch);
@@ -195,7 +195,9 @@ class Submail
         $res = $this->remoteTimestamp();
         $res['appid'] = $this->config['appid'];
         $res['sign_type'] = trim($this->config['sign_type']);
-        $res['project'] = $this->config['project'];
+        if (isset($this->config['project'])) {
+            $res['project'] = $this->config['project'];
+        }
         $res['to'] = $to;
         if (isset($method['vars']) || isset($method['links'])) {
             $res = array_merge($method, $res);
@@ -393,9 +395,40 @@ class Submail
 
     }
 
-    public function mailSend()
+    public function mailSend($params, $config = array())
     {
+        if ($config) {
+            $this->config = $config;
+        }
+        if (!isset($params['to']) || empty($params['to'])) {
+            $this->exitCode('收件人格式不正确');
+        }
+        if (isset($params['vars'])) {
+            $params['vars'] = json_encode($params['vars']);
+        }
+        if (isset($params['links'])) {
+            $params['links'] = json_encode($params['links']);
+        }
+        if (isset($params['attachments'])) {
+            foreach ($params['attachments'] as $k => $v) {
+                $attachments['attachments[' . $k . ']'] = $this->makeCurlFile($v);
+            }
+            unset($params['attachments']);
+            $params = array_merge($params, $attachments);
+        }
+        $to = $params['to'];
+        unset($params['to']);
+        $data = $this->xsend($to, $params);
+        return $this->post($this->api_url . 'mail/send', $data);
+    }
 
+    private function makeCurlFile($file)
+    {
+        $mime = mime_content_type($file);
+        $info = pathinfo($file);
+        $name = $info['basename'];
+        $output = new \CURLFile(realpath($file), $mime, $name);
+        return $output;
     }
 
     /**

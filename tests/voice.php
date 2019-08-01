@@ -12,7 +12,7 @@ $config = array(
 $obj = new Submail();
 $obj->config    =   $config;
 
-//$res = $obj->voiceSend('xxxxxxx','【SUBMAIL】您的短信验证码：4438，请在10分钟内输入。');
+//$res = $obj->voiceSend('*************','【SUBMAIL】您的短信验证码：4438，请在10分钟内输入。');
 
 //$res = $obj->getCredits('voice');
 
@@ -25,5 +25,5 @@ $obj->config    =   $config;
 //];
 //$res    =   $obj->voiceMultixsend($data);
 
-$res    =   $obj->voiceVerify("**********",rand(1000,9999));
+//$res    =   $obj->voiceVerify("**********",rand(1000,9999));
 var_dump($res);
