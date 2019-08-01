@@ -3,9 +3,7 @@
     "description": "php",
     "type": "library",
     "require": {
-        "guzzlehttp/guzzle": "^6.3",
-        "curl/curl": "^2.2",
-        "php-curl-class/php-curl-class": "^8.6"
+        "php": "^5.3"
     },
     "license": "MIT",
     "authors": [
