@@ -16,7 +16,17 @@ $obj->config    =   $config;
 
 
 $res    =   $obj->mailXsend(
-    array('to'=>'xxx@qq.com','from'=>'xxx@xx.top','from_name'=>'调查','reply'=>'xx@xx.top','cc'=>'xx@xx.top','bcc'=>'xx@xx.top','subject'=>'拎草','tag'=>'111','vars'=>['name'=>'声'],'links'=>['mail'=>'baidu.com','account'=>'xx@gg.com']
+    array(
+        'to'=>'xxx@qq.com',
+        'from'=>'xxx@xx.top',
+        'from_name'=>'调查',
+        'reply'=>'xx@xx.top',
+        'cc'=>'xx@xx.top',
+        'bcc'=>'xx@xx.top',
+        'subject'=>'拎草',
+        'tag'=>'111',
+        'vars'=>array('name'=>'声'),
+        'links'=> array('mail'=>'baidu.com','account'=>'xx@gg.com')
     )
 );
 var_dump($res);die;

@@ -25,5 +25,5 @@ $obj->config    =   $config;
 //];
 //$res    =   $obj->voiceMultixsend($data);
 
-$res    =   $obj->voiceVerify("13027232773",rand(1000,9999));
+$res    =   $obj->voiceVerify("**********",rand(1000,9999));
 var_dump($res);

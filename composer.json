@@ -3,7 +3,8 @@
     "description": "php",
     "type": "library",
     "require": {
-        "php": "^5.3"
+        "php": "^5.3",
+        "ext-curl": "*"
     },
     "license": "MIT",
     "authors": [

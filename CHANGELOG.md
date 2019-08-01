@@ -5,6 +5,9 @@
 
 * **idea:** edit ([d8884d1](https://github.com/stefein/submail-sdk/commit/d8884d1))
 * **msg/test:** msg ([6f2ce8f](https://github.com/stefein/submail-sdk/commit/6f2ce8f))
+* **修改composer.json:** composer修正 ([846233b](https://github.com/stefein/submail-sdk/commit/846233b))
+* **修改发布日志:** log ([1ccc7be](https://github.com/stefein/submail-sdk/commit/1ccc7be))
+* **校正邮件参数格式:** 校正 ([3b96061](https://github.com/stefein/submail-sdk/commit/3b96061))
 
 
 ### Features
