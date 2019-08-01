@@ -12,6 +12,7 @@
 
 ### Features
 
+* **mail:** mail ([415905f](https://github.com/stefein/submail-sdk/commit/415905f))
 * modify ([39a364d](https://github.com/stefein/submail-sdk/commit/39a364d))
 * **changlog:** log ([739676c](https://github.com/stefein/submail-sdk/commit/739676c))
 * **readme.md:** readme ([aaab4b2](https://github.com/stefein/submail-sdk/commit/aaab4b2))
