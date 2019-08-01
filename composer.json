@@ -1,22 +1,22 @@
 {
-    "name": "stefein/submail-sdk",
-    "description": "php",
-    "type": "library",
-    "require": {
-        "php": "^5.3",
-        "ext-curl": "*"
-    },
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Hsuechin",
-            "email": "cyan8@live.com"
-        }
-    ],
-    "minimum-stability": "stable",
-    "autoload" : {
-        "psr-4": {
-            "Stefein\\": "src/"
-        }
+  "name": "stefein/submail-sdk",
+  "description": "php",
+  "type": "library",
+  "require": {
+    "php": ">=5.5",
+    "ext-curl": "*"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Hsuechin",
+      "email": "cyan8@live.com"
     }
+  ],
+  "minimum-stability": "stable",
+  "autoload": {
+    "psr-4": {
+      "Stefein\\": "src/"
+    }
+  }
 }
