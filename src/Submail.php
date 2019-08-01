@@ -2,16 +2,11 @@
 
 namespace Stefein;
 
-
-use GuzzleHttp\Client;
-use Psr\Http\Message\ResponseInterface;
-
 class Submail
 {
     public $config = array();
 
-    const SUBMAIL_API_URL = "https://api.mysubmail.com/";
-
+    protected $api_url  =   "https://api.mysubmail.com/";
     protected $timestamp = '';
     protected $http = null;
     protected $encrypt = array();
@@ -29,39 +24,32 @@ class Submail
         }
         $this->encrypt = array('normal', 'md5', 'sha1');
         $this->product = array('message' => 'sms', 'internationalsms' => 'internationalsms', 'voice' => 'voice', 'mms' => 'mms', 'mail' => 'mail');
-        $this->http = new Client([
-            'base_uri' => self::SUBMAIL_API_URL,
-            'timeout' => 2.0
-        ]);
+
         $status = $this->remoteStatus();
-        if ($status['code'] !== 200 || $status['data']['status'] !== 'runing') {
-            $this->http = new Client([
-                'base_uri' => 'http' . trim(self::SUBMAIL_API_URL, 'https'),
-                'timeout' => 2.0
-            ]);
+        if ($status['status'] !== 'runing') {
+            $this->api_url  =   'http' . trim($this->api_url, 'https');
         }
     }
 
-    /**
-     * @param ResponseInterface $response
-     * @return array
-     */
-    protected function processResponse(ResponseInterface $response)
-    {
-        $body = $response->getBody();
-        $contents = $body->getContents();
-        $contents = json_decode($contents, true);
-        return ['code' => $response->getStatusCode(), 'status' => $response->getReasonPhrase(), 'data' => $contents];
-    }
+//    /**
+//     * @param ResponseInterface $response
+//     * @return array
+//     */
+//    protected function processResponse(ResponseInterface $response)
+//    {
+//        $body = $response->getBody();
+//        $contents = $body->getContents();
+//        $contents = json_decode($contents, true);
+//        return ['code' => $response->getStatusCode(), 'status' => $response->getReasonPhrase(), 'data' => $contents];
+//    }
 
     /**
      * @return array
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function remoteTimestamp()
+    protected function remoteTimestamp()
     {
-        $res = $this->http->request('GET', '/service/timestamp');
-        return $this->processResponse($res);
+        return  $this->get($this->api_url.'/service/timestamp');
     }
 
     /**
@@ -77,18 +65,44 @@ class Submail
      * @return array
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function remoteStatus()
+    protected function remoteStatus()
     {
-        $res = $this->http->request('GET', '/service/status');
-        return $this->processResponse($res);
+        return  $this->get($this->api_url.'/service/status');
     }
 
     /**
-     * @param $type
-     * @param array $config
-     * @return array
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @param $api
+     * @param $data
+     * @return mixed
      */
+    protected function post($api,$data)
+    {
+        $ch = curl_init();
+        curl_setopt_array($ch, array(
+            CURLOPT_URL => $api,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POSTFIELDS => http_build_query($data),
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_HTTPHEADER => array("Content-Type: application/x-www-form-urlencoded")
+        ));
+        $output = curl_exec($ch);
+        curl_close($ch);
+        $output = trim($output, "\xEF\xBB\xBF");
+        return json_decode($output, true);
+    }
+
+
+    protected function get($api)
+    {
+        $ch = curl_init($api);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
+        $output = curl_exec($ch);
+        curl_close($ch);
+        $output = trim($output, "\xEF\xBB\xBF");
+        return json_decode($output, true);
+    }
+
     public function getCredits($type, $config = array())
     {
         if ($config) {
@@ -100,23 +114,14 @@ class Submail
         } else {
             $this->exitCode('未正确配置业务名称');
         }
-        $res['timestamp'] = $this->remoteTimestamp();
-        $res['timestamp'] = $res['timestamp']['data']['timestamp'];
+        $res = $this->remoteTimestamp();
         $res['appid'] = $this->config['appid'];
         $res['sign_type'] = $this->config['sign_type'];
         $res['signature'] = $this->buildSignature($res);
-        $response = $this->http->post($url, [
-            'form_params' => $res
-        ]);
-        return $this->processResponse($response);
+        return $this->post($this->api_url.$url, $res);
     }
 
-    /**
-     * @param $type
-     * @param array $config
-     * @return array
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
+
     public function getLog($type, $config = array())
     {
         if ($config) {
@@ -128,17 +133,17 @@ class Submail
         } else {
             $this->exitCode('未正确配置业务名称');
         }
-        $res['timestamp'] = $this->remoteTimestamp();
-        $res['timestamp'] = $res['timestamp']['data']['timestamp'];
+        $res = $this->remoteTimestamp();
         $res['appid'] = $this->config['appid'];
         $res['sign_type'] = $this->config['sign_type'];
         $res['signature'] = $this->buildSignature($res);
-        $response = $this->http->post($url, [
-            'form_params' => $res
-        ]);
-        return $this->processResponse($response);
+        return $this->post($this->api_url.$url, $res);
     }
 
+    /**
+     * @param $request
+     * @return mixed|string
+     */
     protected function buildSignature($request)
     {
         ksort($request);
@@ -169,8 +174,7 @@ class Submail
 
     private function send($to, $content = '')
     {
-        $res['timestamp'] = $this->remoteTimestamp();
-        $res['timestamp'] = $res['timestamp']['data']['timestamp'];
+        $res = $this->remoteTimestamp();
         $res['appid'] = $this->config['appid'];
         $res['sign_type'] = trim($this->config['sign_type']);
         $res['content'] = $content;
@@ -181,8 +185,7 @@ class Submail
 
     private function xsend($to, $method = array())
     {
-        $res['timestamp'] = $this->remoteTimestamp();
-        $res['timestamp'] = $res['timestamp']['data']['timestamp'];
+        $res = $this->remoteTimestamp();
         $res['appid'] = $this->config['appid'];
         $res['sign_type'] = trim($this->config['sign_type']);
         $res['project'] = $this->config['project'];
@@ -198,8 +201,7 @@ class Submail
 
     private function multiSend($params, $method = '')
     {
-        $res['timestamp'] = $this->remoteTimestamp();
-        $res['timestamp'] = $res['timestamp']['data']['timestamp'];
+        $res = $this->remoteTimestamp();
         $res['appid'] = $this->config['appid'];
         $res['sign_type'] = trim($this->config['sign_type']);
         $res['content'] = $params;
@@ -216,8 +218,7 @@ class Submail
 
     private function multixSend($method = array())
     {
-        $res['timestamp'] = $this->remoteTimestamp();
-        $res['timestamp'] = $res['timestamp']['data']['timestamp'];
+        $res = $this->remoteTimestamp();
         $res['appid'] = $this->config['appid'];
         $res['sign_type'] = trim($this->config['sign_type']);
         $res['project'] = $this->config['project'];
@@ -233,16 +234,27 @@ class Submail
         return $res;
     }
 
+    public function voiceVerify($to, $code, $config = array())
+    {
+        if ($config) {
+            $this->config = $config;
+        }
+        $data = $this->remoteTimestamp();
+        $data['appid'] = $this->config['appid'];
+        $data['sign_type'] = trim($this->config['sign_type']);
+        $data['code'] = trim($code);
+        $data['to'] = trim($to);
+        $data['signature'] = $this->buildSignature($data);
+        return $this->post($this->api_url.'/voice/verify',$data);
+    }
+
     public function messageSend($to, $content, $config = array())
     {
         if ($config) {
             $this->config = $config;
         }
         $data = $this->send($to, $content);
-        $response = $this->http->post('message/send', [
-            'form_params' => $data
-        ]);
-        return $this->processResponse($response);
+        return $this->post($this->api_url.'/message/send',$data);
     }
 
     public function messageXsend($to, $params, $config = array())
@@ -251,10 +263,7 @@ class Submail
             $this->config = $config;
         }
         $data = $this->xsend($to, $params);
-        $response = $this->http->post('message/xsend', [
-            'form_params' => $data
-        ]);
-        return $this->processResponse($response);
+        return $this->post($this->api_url.'/message/xsend',$data);
     }
 
     public function messageMultisend($to, $params, $config = array())
@@ -263,10 +272,7 @@ class Submail
             $this->config = $config;
         }
         $data = $this->multiSend($to, $params);
-        $response = $this->http->post('message/multisend', [
-            'form_params' => $data
-        ]);
-        return $this->processResponse($response);
+        return $this->post($this->api_url.'/message/multisend',$data);
     }
 
     public function messageMultixsend($params, $config = array())
@@ -275,10 +281,12 @@ class Submail
             $this->config = $config;
         }
         $data = $this->multixSend($params);
-        $response = $this->http->post('message/multixsend', [
-            'form_params' => $data
-        ]);
-        return $this->processResponse($response);
+        return $this->post($this->api_url.'/message/multixsend',$data);
+    }
+
+    public function verifyPhonenumber()
+    {
+
     }
 
     public function voiceSend($to, $content, $config = array())
@@ -287,10 +295,7 @@ class Submail
             $this->config = $config;
         }
         $data = $this->send($to, $content);
-        $response = $this->http->post('voice/send', [
-            'form_params' => $data
-        ]);
-        return $this->processResponse($response);
+        return $this->post($this->api_url.'/voice/send',$data);
     }
 
     public function voiceXsend($to, $params, $config = array())
@@ -299,10 +304,7 @@ class Submail
             $this->config = $config;
         }
         $data = $this->xsend($to, $params);
-        $response = $this->http->post('voice/xsend', [
-            'form_params' => $data
-        ]);
-        return $this->processResponse($response);
+        return $this->post($this->api_url.'/voice/xsend',$data);
     }
 
     public function voiceMultixsend($params, $config = array())
@@ -311,28 +313,7 @@ class Submail
             $this->config = $config;
         }
         $data = $this->multixSend($params);
-        $response = $this->http->post('voice/multixsend', [
-            'form_params' => $data
-        ]);
-        return $this->processResponse($response);
-    }
-
-    public function voiceVerify($to, $code, $config = array())
-    {
-        if ($config) {
-            $this->config = $config;
-        }
-        $res['timestamp'] = $this->remoteTimestamp();
-        $res['timestamp'] = $res['timestamp']['data']['timestamp'];
-        $res['appid'] = $this->config['appid'];
-        $res['sign_type'] = trim($this->config['sign_type']);
-        $res['code'] = trim($code);
-        $res['to'] = trim($to);
-        $res['signature'] = $this->buildSignature($res);
-        $response = $this->http->post('voice/verify', [
-            'form_params' => $res
-        ]);
-        return $this->processResponse($response);
+        return $this->post($this->api_url.'/voice/multixsend',$data);
     }
 
     public function internationalSmsSend()
@@ -346,11 +327,6 @@ class Submail
     }
 
     public function internationalSmsMultixsend()
-    {
-
-    }
-
-    public function verifyPhonenumber()
     {
 
     }
@@ -371,15 +347,12 @@ class Submail
         if (isset($params['vars'])) {
             $params['vars'] = json_encode($params['vars']);
         }
-        if (isset($params['link'])) {
-            $params['link'] = json_encode($params['link']);
+        if (isset($params['links'])) {
+            $params['links'] = json_encode($params['links']);
         }
         $to = $params['to'];
         unset($params['to']);
         $data = $this->xsend($to, $params);
-        $response = $this->http->post('mail/xsend', [
-            'form_params' => $data
-        ]);
-        return $this->processResponse($response);
+        return $this->post($this->api_url.'mail/xsend', $data);
     }
 }

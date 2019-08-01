@@ -5,15 +5,18 @@ require('../vendor/autoload.php');
 use Stefein\Submail;
 
 $config = array(
-    "appid" => "*****",
-    "appkey" => "*****************",
+    "appid" => "13724",
+    "appkey" => "bc3732c4e9689b0a73a053d6aeae893c",
     "sign_type" =>  "md5",
-    "project"   =>  "******"
+    "project"   =>  "JCB6G2"
 );
 $obj = new Submail();
 $obj->config    =   $config;
 
 
 
-$res    =   $obj->mailXsend(array('to'=>'130******@qq.com,130******@qq.com','from'=>'130******@submail.com','from_name'=>'调查','reply'=>'130******@qq.com','cc'=>'130******@qq.com','bcc'=>'130******@qq.com','subject'=>'拎草','tag'=>'*****','vars'=>['name'=>'声']));
+$res    =   $obj->mailXsend(
+    array('to'=>'xxx@qq.com','from'=>'xxx@xx.top','from_name'=>'调查','reply'=>'xx@xx.top','cc'=>'xx@xx.top','bcc'=>'xx@xx.top','subject'=>'拎草','tag'=>'111','vars'=>['name'=>'声'],'links'=>['mail'=>'baidu.com','account'=>'xx@gg.com']
+    )
+);
 var_dump($res);die;
