@@ -13,7 +13,7 @@ use Stefein\Submail;
 
 /*
 *   @sign_type  为 md5 sha1 或者 normal 
-*   @config   =   array('appid','appkey','sign_type');
+*   @config   =   array('appid'=>xxxxx,'appkey'=>xxxxxxxxxxxx,'sign_type'=>'md5');
 *   以上为基本参数
 *   使用模板发送 则需要加入 控制台项目名称project，如:JCB6G2 
 */
